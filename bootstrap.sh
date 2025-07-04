@@ -117,20 +117,22 @@ for desc in "${!HELPERS[@]}"; do
 done
 
 # Prompt for manual PIA installation
-echo "Private Internet Access (PIA) VPN is not installed automatically."
-echo "You'll need to download the latest Linux installer manually."
-echo "Do you want to open the page now? [y/N]"
-if prompt_yes_no; then
-  xdg-open "https://www.privateinternetaccess.com/download/linux-vpn" >/dev/null 2>&1 || {
-    echo "Failed to open browser. Please open the following URL manually:"
-    echo "   https://www.privateinternetaccess.com/download/linux-vpn"
-  }
+# Prompt for manual PIA installation
+echo "Private Internet Access (PIA) VPN isn’t automated."
+echo "You’ll need to grab the Linux installer yourself."
+if prompt_yes_no "Open the PIA download page now? [y/N]"; then
+  if ! xdg-open "https://www.privateinternetaccess.com/download/linux-vpn"; then
+    echo "❌ Could not open browser—please visit:"
+    echo "    https://www.privateinternetaccess.com/download/linux-vpn"
+  fi
+else
+  echo "⏭️  Skipping PIA download page."
 fi
 echo
 
+
 echo "Please download and install the appropriate .deb or .run file for your system."
-echo "Do you want to open the page now? [y/N]"
-if prompt_yes_no; then
+if prompt_yes_no "Do you want to open the page now? [y/N]"; then
   xdg-open "https://www.privateinternetaccess.com/download/linux-vpn" >/dev/null 2>&1 || {
     echo "Failed to open browser. Please open the following URL manually:"
     echo "   https://www.privateinternetaccess.com/download/linux-vpn"
@@ -142,7 +144,10 @@ echo
 echo "If running GNOME Desktop Environment, consider installing the 'Dash to Dock' and 'system-monitor-next' GNOME extensions."
 echo "Dash to Dock: https://extensions.gnome.org/extension/307/dash-to-dock/"
 echo "system-monitor-next: https://extensions.gnome.org/extension/3010/system-monitor-next/"
-echo
+if prompt_yes_no "Do you want to open their pages? [y/N]"; then
+  xdg-open "https://extensions.gnome.org/extension/307/dash-to-dock/"
+  xdg-open "https://extensions.gnome.org/extension/3010/system-monitor-next/"
+fi
 
 # Suggest NVIDIA drivers installation
 echo "If you are running an NVIDIA GPU, consider installing the NVIDIA drivers using the script:"
