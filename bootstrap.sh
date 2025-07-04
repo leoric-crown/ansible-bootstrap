@@ -36,15 +36,16 @@ curl -fsLS get.chezmoi.io | sh
 echo "[+] Checking GitHub authentication..."
 gh auth status >/dev/null 2>&1 || gh auth login
 
-echo "[+] Initializing chezmoi…"
+echo "[+] Initializing chezmoi..."
 if [ -d "$HOME/.local/share/chezmoi" ]; then
   echo "[✓] chezmoi already initialized"
 else
-  echo "[+] First‐time init of chezmoi"
+  echo "[+] First-time init of chezmoi"
   chezmoi init https://github.com/leoric-crown/dotfiles.git
 fi
 
-echo "[+] Cloning ansible repo (branch: $ANSIBLEBRANCH)..."
+# 3) Ansible repo
+echo "[+] Cloning ansible repo (branch: $ANSIBLEBRANCH)…"
 if [ ! -d "$ANSIBLEDIR/.git" ]; then
   git clone --branch "$ANSIBLEBRANCH" \
     https://github.com/leoric-crown/ansible.git "$ANSIBLEDIR"
@@ -53,12 +54,14 @@ else
 fi
 
 if [ -d "$ANSIBLEDIR/.git" ]; then
-  echo "[+] Updating ansible repo..."
+  echo "[+] Force-syncing ansible repo to origin/$ANSIBLEBRANCH…"
+  git -C "$ANSIBLEDIR" fetch origin "$ANSIBLEBRANCH"
   git -C "$ANSIBLEDIR" checkout "$ANSIBLEBRANCH"
-  git -C "$ANSIBLEDIR" pull --ff-only
+  git -C "$ANSIBLEDIR" reset --hard "origin/$ANSIBLEBRANCH"
 fi
 
-echo "[+] Cloning leoric-scripts repo (branch: $SCRIPTBRANCH)..."
+# 4) leoric-scripts repo
+echo "[+] Cloning leoric-scripts repo (branch: $SCRIPTBRANCH)…"
 if [ ! -d "$SCRIPTDIR/.git" ]; then
   git clone --branch "$SCRIPTBRANCH" \
     https://github.com/leoric-crown/leoric-scripts.git "$SCRIPTDIR"
@@ -67,9 +70,10 @@ else
 fi
 
 if [ -d "$SCRIPTDIR/.git" ]; then
-  echo "[+] Updating leoric-scripts repo..."
+  echo "[+] Force-syncing leoric-scripts repo to origin/$SCRIPTBRANCH…"
+  git -C "$SCRIPTDIR" fetch origin "$SCRIPTBRANCH"
   git -C "$SCRIPTDIR" checkout "$SCRIPTBRANCH"
-  git -C "$SCRIPTDIR" pull --ff-only
+  git -C "$SCRIPTDIR" reset --hard "origin/$SCRIPTBRANCH"
 fi
 
 echo "[+] Running Ansible provisioning..."
