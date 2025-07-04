@@ -38,8 +38,7 @@ gh auth status >/dev/null 2>&1 || gh auth login
 
 echo "[+] Initializing chezmoi…"
 if [ -d "$HOME/.local/share/chezmoi" ]; then
-  echo "[✓] chezmoi already initialized, running update instead"
-  chezmoi update
+  echo "[✓] chezmoi already initialized"
 else
   echo "[+] First‐time init of chezmoi"
   chezmoi init https://github.com/leoric-crown/dotfiles.git
