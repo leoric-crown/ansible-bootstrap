@@ -93,12 +93,12 @@ prompt_yes_no() {
 
 echo "[+] Running optional helper scripts..."
 
-# helper description and path
+# proper associative-array syntax: no spaces around the =
 declare -A HELPERS=(
-  ["Add SSH keys to GitHub"] = "$KEY_SCRIPT"
-  ["Mount shared drive"]    = "$MNT_SHARED_SCRIPT"
-  ["Set up BitLocker mounts"] = "$BITLOCKER_SCRIPT"
-  ["Sync PiHole hosts"]      = "$PIHOLE_SCRIPT"
+  ["Add SSH keys to GitHub"]="$KEY_SCRIPT"
+  ["Mount shared drive"]="$MNT_SHARED_SCRIPT"
+  ["Set up BitLocker mounts"]="$BITLOCKER_SCRIPT"
+  ["Sync PiHole hosts"]="$PIHOLE_SCRIPT"
 )
 
 for desc in "${!HELPERS[@]}"; do
