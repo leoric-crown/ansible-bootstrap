@@ -50,4 +50,5 @@ echo "[+] Cloning leoric-scripts repo..."
 
 echo "[+] Running Ansible provisioning..."
 cd "$ANSIBLEDIR"
-ansible-playbook -i inventory.yml playbook.yml
+export ANSIBLE_INVENTORY_USER="${USER:-$(whoami)}"
+ansible-playbook -i "$ANSIBLEDIR/inventory.yml" playbook.yml
