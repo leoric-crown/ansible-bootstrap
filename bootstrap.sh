@@ -140,6 +140,9 @@ else
   echo "⏭️  Skipping GNOME extensions pages."
 fi
 
+# Display System information using fastfetch
+fastfetch
+
 # Suggest NVIDIA drivers installation
 echo "If you are running an NVIDIA GPU, consider installing the NVIDIA drivers using the script:"
 echo "          $SCRIPTDIR/linux/fedora/nvidia_drivers.bash (Fedora)"
