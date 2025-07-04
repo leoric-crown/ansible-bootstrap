@@ -86,15 +86,6 @@ MNT_SHARED_SCRIPT="$SCRIPTDIR/linux/fedora/mnt_shared.bash"
 BITLOCKER_SCRIPT="$SCRIPTDIR/linux/bitlocker/bitlocker-setup.bash"
 PIHOLE_SCRIPT="$SCRIPTDIR/linux/sync-pihole-hosts.bash"
 
-echo "[+] Adding SSH keys to GitHub..."
-
-if [ -f "$KEY_SCRIPT" ]; then
-  chmod +x "$KEY_SCRIPT"
-  bash "$KEY_SCRIPT"
-else
-  echo "❌  SSH key upload script not found at $KEY_SCRIPT"
-fi
-
 prompt_yes_no() {
   read -rp "$1 [y/N] " ans
   [[ $ans =~ ^[Yy]$ ]]
@@ -104,15 +95,11 @@ echo "[+] Running optional helper scripts..."
 
 # helper description and path
 declare -A HELPERS=(
+  ["Add SSH keys to GitHub"] = "$KEY_SCRIPT"
   ["Mount shared drive"]    = "$MNT_SHARED_SCRIPT"
   ["Set up BitLocker mounts"] = "$BITLOCKER_SCRIPT"
   ["Sync PiHole hosts"]      = "$PIHOLE_SCRIPT"
 )
-
-prompt_yes_no() {
-  read -rp "$1 [y/N] " ans
-  [[ $ans =~ ^[Yy]$ ]]
-}
 
 for desc in "${!HELPERS[@]}"; do
   path="${HELPERS[$desc]}"
