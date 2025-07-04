@@ -65,4 +65,5 @@ fi
 
 echo "[+] Running Ansible provisioning..."
 export ANSIBLE_INVENTORY_USER="${USER:-$(whoami)}"
+export ANSIBLE_INVENTORY_USER_DIR="${HOME:-/home/$ANSIBLE_INVENTORY_USER}"
 ansible-playbook -i "$ANSIBLEDIR/inventory.yml" "$ANSIBLEDIR/playbook.yml" --ask-become-pass
