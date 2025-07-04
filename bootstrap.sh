@@ -26,8 +26,6 @@ echo "[+] Cloning leoric-scripts repo..."
   git clone https://github.com/leoric-crown/leoric-scripts.git "$SCRIPTDIR"
 }
 
-
-
 echo "[+] Running Ansible provisioning..."
 cd "$ANSIBLEDIR"
 ansible-playbook -i inventory.yml playbook.yml
