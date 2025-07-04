@@ -10,7 +10,7 @@ if ! command -v gh &> /dev/null; then
   sudo dnf install -y gh
 fi
 
-if ! command -v ansible &> /dev/null; then
+if ! command -v ansible-playbook &> /dev/null; then
   echo "[+] Installing Ansible..."
   sudo dnf install -y ansible
 fi
