@@ -9,7 +9,7 @@ gh auth status >/dev/null 2>&1 || gh auth login
 
 echo "[+] Initializing chezmoi..."
 chezmoi init git@github.com:leoric-crown/dotfiles.git || {
-  echo "⚠️ SSH clone failed. Trying HTTPS fallback..."
+  echo "⚠️ SSH init failed. Trying HTTPS fallback..."
   chezmoi init https://github.com/leoric-crown/dotfiles.git
 }
 
