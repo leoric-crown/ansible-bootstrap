@@ -4,10 +4,15 @@ set -euo pipefail
 ANSIBLEDIR="$HOME/ansible"
 SCRIPTDIR="$HOME/scripts"
 
-# Ensure gh and chezmoi are installed
+# Ensure gh, ansible, and chezmoi are installed
 if ! command -v gh &> /dev/null; then
   echo "[+] Installing GitHub CLI..."
   sudo dnf install -y gh
+fi
+
+if ! command -v ansible &> /dev/null; then
+  echo "[+] Installing Ansible..."
+  sudo dnf install -y ansible
 fi
 
 if ! command -v chezmoi &> /dev/null; then
