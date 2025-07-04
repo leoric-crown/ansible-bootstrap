@@ -4,6 +4,17 @@ set -euo pipefail
 ANSIBLEDIR="$HOME/ansible"
 SCRIPTDIR="$HOME/scripts"
 
+# Ensure gh and chezmoi are installed
+if ! command -v gh &> /dev/null; then
+  echo "[+] Installing GitHub CLI..."
+  sudo dnf install -y gh
+fi
+
+if ! command -v chezmoi &> /dev/null; then
+  echo "[+] Installing chezmoi..."
+  curl -fsLS get.chezmoi.io | sh
+fi
+
 # Ensure GitHub CLI is authenticated
 echo "[+] Checking GitHub authentication..."
 gh auth status >/dev/null 2>&1 || gh auth login
