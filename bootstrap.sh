@@ -4,6 +4,9 @@ set -euo pipefail
 ANSIBLEDIR="$HOME/ansible"
 SCRIPTDIR="$HOME/scripts"
 
+ANSIBLEBRANCH="main"
+SCRIPTBRANCH="main"
+
 
 install_if_missing() {
   local package="$1"
@@ -42,11 +45,23 @@ echo "[+] Cloning ansible repo..."
   git clone https://github.com/leoric-crown/ansible.git "$ANSIBLEDIR"
 }
 
+if [ -d "$ANSIBLEDIR/.git" ]; then
+  echo "[+] Updating ansible repo..."
+  git -C "$ANSIBLEDIR" checkout "$ANSIBLEBRANCH"
+  git -C "$ANSIBLEDIR" pull --ff-only
+fi
+
 echo "[+] Cloning leoric-scripts repo..."
 [ -d "$SCRIPTDIR" ] || gh repo clone leoric-crown/leoric-scripts "$SCRIPTDIR" || {
   echo "⚠️ SSH clone failed. Trying HTTPS fallback..."
   git clone https://github.com/leoric-crown/leoric-scripts.git "$SCRIPTDIR"
 }
+
+if [ -d "$SCRIPTDIR/.git" ]; then
+  echo "[+] Updating leoric-scripts repo..."
+  git -C "$SCRIPTDIR" checkout "$SCRIPTBRANCH"
+  git -C "$SCRIPTDIR" pull --ff-only
+fi
 
 echo "[+] Running Ansible provisioning..."
 export ANSIBLE_INVENTORY_USER="${USER:-$(whoami)}"
