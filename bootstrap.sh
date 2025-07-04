@@ -4,21 +4,27 @@ set -euo pipefail
 ANSIBLEDIR="$HOME/ansible"
 SCRIPTDIR="$HOME/scripts"
 
-# Ensure gh, ansible, and chezmoi are installed
-if ! command -v gh &> /dev/null; then
-  echo "[+] Installing GitHub CLI..."
-  sudo dnf install -y gh
-fi
 
-if ! command -v ansible-playbook &> /dev/null; then
-  echo "[+] Installing Ansible..."
-  sudo dnf install -y ansible
-fi
+install_if_missing() {
+  local package="$1"
+  if ! dnf list --installed "$package" &>/dev/null; then
+    echo "[+] Installing $package..."
+    sudo dnf install -y "$package"
+  else
+    echo "[✓] $package is already installed."
+  fi
+}
 
-if ! command -v chezmoi &> /dev/null; then
-  echo "[+] Installing chezmoi..."
-  curl -fsLS get.chezmoi.io | sh
-fi
+echo "🚀 Starting bootstrap process..."
+
+# Ensure Ansible is installed
+install_if_missing ansible
+# Ensure GitHub CLI is installed
+install_if_missing gh
+# Ensure chezmoi is installed
+echo "[+] Ensuring chezmoi is installed/up-to-date..."
+curl -fsLS get.chezmoi.io | sh
+
 
 # Ensure GitHub CLI is authenticated
 echo "[+] Checking GitHub authentication..."
