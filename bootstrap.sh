@@ -117,10 +117,9 @@ for desc in "${!HELPERS[@]}"; do
 done
 
 # Prompt for manual PIA installation
-# Prompt for manual PIA installation
 echo "Private Internet Access (PIA) VPN isn’t automated."
 echo "You’ll need to grab the Linux installer yourself."
-if prompt_yes_no "Open the PIA download page now? [y/N]"; then
+if prompt_yes_no "Open the PIA download page now?"; then
   if ! xdg-open "https://www.privateinternetaccess.com/download/linux-vpn"; then
     echo "❌ Could not open browser—please visit:"
     echo "    https://www.privateinternetaccess.com/download/linux-vpn"
@@ -130,23 +129,15 @@ else
 fi
 echo
 
-
-echo "Please download and install the appropriate .deb or .run file for your system."
-if prompt_yes_no "Do you want to open the page now? [y/N]"; then
-  xdg-open "https://www.privateinternetaccess.com/download/linux-vpn" >/dev/null 2>&1 || {
-    echo "Failed to open browser. Please open the following URL manually:"
-    echo "   https://www.privateinternetaccess.com/download/linux-vpn"
-  }
-fi
-echo
-
 # Suggest GNOME extensions
 echo "If running GNOME Desktop Environment, consider installing the 'Dash to Dock' and 'system-monitor-next' GNOME extensions."
 echo "Dash to Dock: https://extensions.gnome.org/extension/307/dash-to-dock/"
 echo "system-monitor-next: https://extensions.gnome.org/extension/3010/system-monitor-next/"
-if prompt_yes_no "Do you want to open their pages? [y/N]"; then
-  xdg-open "https://extensions.gnome.org/extension/307/dash-to-dock/"
-  xdg-open "https://extensions.gnome.org/extension/3010/system-monitor-next/"
+if prompt_yes_no "Do you want to open their pages?"; then
+  xdg-open "https://extensions.gnome.org/extension/307/dash-to-dock/"  >/dev/null 2>&1
+  xdg-open "https://extensions.gnome.org/extension/3010/system-monitor-next/"  >/dev/null 2>&1
+else
+  echo "⏭️  Skipping GNOME extensions pages."
 fi
 
 # Suggest NVIDIA drivers installation
