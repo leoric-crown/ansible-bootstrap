@@ -16,5 +16,5 @@ This script automates:
 Run this on a freshly installed Fedora system:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/leoric-crown/bootstrap-ansible/main/bootstrap.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/leoric-crown/ansible-bootstrap/main/bootstrap.sh)
 ```
