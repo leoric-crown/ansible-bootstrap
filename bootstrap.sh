@@ -34,10 +34,7 @@ echo "[+] Checking GitHub authentication..."
 gh auth status >/dev/null 2>&1 || gh auth login
 
 echo "[+] Initializing chezmoi..."
-chezmoi init git@github.com:leoric-crown/dotfiles.git || {
-  echo "⚠️ SSH init failed. Trying HTTPS fallback..."
-  chezmoi init https://github.com/leoric-crown/dotfiles.git
-}
+chezmoi init https://github.com/leoric-crown/dotfiles.git
 
 echo "[+] Cloning ansible repo..."
 [ -d "$ANSIBLEDIR" ] || gh repo clone leoric-crown/ansible "$ANSIBLEDIR" || {
@@ -67,3 +64,31 @@ echo "[+] Running Ansible provisioning..."
 export ANSIBLE_INVENTORY_USER="${USER:-$(whoami)}"
 export ANSIBLE_INVENTORY_USER_DIR="/home/$ANSIBLE_INVENTORY_USER"
 ansible-playbook -i "$ANSIBLEDIR/inventory.yml" "$ANSIBLEDIR/playbook.yml" --ask-become-pass
+
+echo "[+] Adding SSH keys to GitHub..."
+chmod +x "$SCRIPTDIR/github/add-gh-ssh-keys.bash"
+bash "$SCRIPTDIR/github/add-gh-ssh-keys.bash"
+
+echo "Do you want to mount the shared drive? [y/N]"
+read -r response
+if [[ "$response" == [yY] ]]; then
+  echo "[+] Mounting shared drive..."
+  chmod +x "$SCRIPTDIR/linux/fedora/mnt_shared.bash"
+  bash "$SCRIPTDIR/linux/fedora/mnt_shared.bash"
+fi
+
+echo "Do you want to set up bitlocker mounts on dual boot machine with Win10/11? [y/N]"
+read -r response
+if [[ "$response" == [yY] ]]; then
+  echo "[+] Setting up bitlocker mounts..."
+  chmod +x "$SCRIPTDIR/linux/bitlocker/bitlocker-setup.bash"
+  bash "$SCRIPTDIR/linux/bitlocker/bitlocker-setup.bash"
+fi
+
+echo "Do you want to sync PiHole hosts? [y/N]"
+read -r response
+if [[ "$response" == [yY] ]]; then
+  echo "[+] Syncing PiHole hosts..."
+  chmod +x "$SCRIPTDIR/linux/sync-pihole-hosts.bash"
+  bash "$SCRIPTDIR/linux/sync-pihole-hosts.bash"
+fi
