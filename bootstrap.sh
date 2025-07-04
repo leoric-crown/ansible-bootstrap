@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ANSIBLEDIR="$HOME/ansible"
+SCRIPTDIR="$HOME/scripts"
 
 # Ensure GitHub CLI is authenticated
 echo "[+] Checking GitHub authentication..."
@@ -18,6 +19,14 @@ echo "[+] Cloning ansible repo..."
   echo "⚠️ SSH clone failed. Trying HTTPS fallback..."
   git clone https://github.com/leoric-crown/ansible.git "$ANSIBLEDIR"
 }
+
+echo "[+] Cloning leoric-scripts repo..."
+[ -d "$SCRIPTDIR" ] || gh repo clone leoric-crown/leoric-scripts "$SCRIPTDIR" || {
+  echo "⚠️ SSH clone failed. Trying HTTPS fallback..."
+  git clone https://github.com/leoric-crown/leoric-scripts.git "$SCRIPTDIR"
+}
+
+
 
 echo "[+] Running Ansible provisioning..."
 cd "$ANSIBLEDIR"
