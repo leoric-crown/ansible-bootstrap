@@ -36,6 +36,7 @@ install_if_missing gh
 echo "[+] Ensuring chezmoi is installed/up-to-date..."
 curl -fsLS get.chezmoi.io | sh
 
+export PATH="$HOME/.local/bin:$PATH"
 
 # Ensure GitHub CLI is authenticated
 echo "[+] Checking GitHub authentication..."
