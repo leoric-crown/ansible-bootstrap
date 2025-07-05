@@ -23,6 +23,11 @@ install_if_missing() {
 
 echo "🚀 Starting bootstrap process..."
 
+# Set dark theme
+echo "[+] Setting dark theme..."
+gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+
 # Ensure Ansible is installed
 install_if_missing ansible
 # Ensure GitHub CLI is installed
