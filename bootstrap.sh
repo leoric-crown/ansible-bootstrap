@@ -4,7 +4,11 @@ set -euo pipefail
 trap 'echo "❌ Error on line $LINENO"' ERR
 
 ANSIBLEDIR="$HOME/ansible"
-SCRIPTDIR="$HOME/scripts"
+SCRIPTSDIR="$HOME/scripts"
+
+DOTFILESREPO="https://github.com/leoric-crown/dotfiles.git"
+ANSIBLEREPO="https://github.com/leoric-crown/ansible.git"
+SCRIPTSREPO="https://github.com/leoric-crown/leoric-scripts.git"
 
 ANSIBLEBRANCH="main"
 SCRIPTBRANCH="main"
@@ -48,14 +52,14 @@ if [ -d "$HOME/.local/share/chezmoi" ]; then
   echo "[✓] chezmoi already initialized"
 else
   echo "[+] First-time init of chezmoi"
-  chezmoi init https://github.com/leoric-crown/dotfiles.git
+  chezmoi init "$DOTFILESREPO"
 fi
 
-# 3) Ansible repo
+# Ansible repo
 echo "[+] Cloning ansible repo (branch: $ANSIBLEBRANCH)…"
 if [ ! -d "$ANSIBLEDIR/.git" ]; then
   git clone --branch "$ANSIBLEBRANCH" \
-    https://github.com/leoric-crown/ansible.git "$ANSIBLEDIR"
+    "$ANSIBLEREPO" "$ANSIBLEDIR"
 else
   echo "[✓] $ANSIBLEDIR already exists, skipping clone."
 fi
@@ -67,31 +71,33 @@ if [ -d "$ANSIBLEDIR/.git" ]; then
   git -C "$ANSIBLEDIR" reset --hard "origin/$ANSIBLEBRANCH"
 fi
 
-# 4) leoric-scripts repo
+# Scripts repo
 echo "[+] Cloning leoric-scripts repo (branch: $SCRIPTBRANCH)…"
-if [ ! -d "$SCRIPTDIR/.git" ]; then
+if [ ! -d "$SCRIPTSDIR/.git" ]; then
   git clone --branch "$SCRIPTBRANCH" \
-    https://github.com/leoric-crown/leoric-scripts.git "$SCRIPTDIR"
+    "$SCRIPTSREPO" "$SCRIPTSDIR"
 else
-  echo "[✓] $SCRIPTDIR already exists, skipping clone."
+  echo "[✓] $SCRIPTSDIR already exists, skipping clone."
 fi
 
-if [ -d "$SCRIPTDIR/.git" ]; then
+if [ -d "$SCRIPTSDIR/.git" ]; then
   echo "[+] Force-syncing leoric-scripts repo to origin/$SCRIPTBRANCH…"
-  git -C "$SCRIPTDIR" fetch origin "$SCRIPTBRANCH"
-  git -C "$SCRIPTDIR" checkout "$SCRIPTBRANCH"
-  git -C "$SCRIPTDIR" reset --hard "origin/$SCRIPTBRANCH"
+  git -C "$SCRIPTSDIR" fetch origin "$SCRIPTBRANCH"
+  git -C "$SCRIPTSDIR" checkout "$SCRIPTBRANCH"
+  git -C "$SCRIPTSDIR" reset --hard "origin/$SCRIPTBRANCH"
 fi
 
+# Ansible provisioning
 echo "[+] Running Ansible provisioning..."
 export ANSIBLE_INVENTORY_USER="${USER:-$(whoami)}"
 export ANSIBLE_INVENTORY_USER_DIR="/home/$ANSIBLE_INVENTORY_USER"
 ansible-playbook -i "$ANSIBLEDIR/inventory.yml" "$ANSIBLEDIR/playbook.yml" --ask-become-pass
 
-KEY_SCRIPT="$SCRIPTDIR/github/add-gh-ssh-keys.bash"
-MNT_SHARED_SCRIPT="$SCRIPTDIR/linux/fedora/mnt_shared.bash"
-BITLOCKER_SCRIPT="$SCRIPTDIR/linux/bitlocker/bitlocker-setup.bash"
-PIHOLE_SCRIPT="$SCRIPTDIR/linux/sync-pihole-hosts.bash"
+# Helper scripts
+KEY_SCRIPT="$SCRIPTSDIR/github/add-gh-ssh-keys.bash"
+MNT_SHARED_SCRIPT="$SCRIPTSDIR/linux/fedora/mnt_shared.bash"
+BITLOCKER_SCRIPT="$SCRIPTSDIR/linux/bitlocker/bitlocker-setup.bash"
+PIHOLE_SCRIPT="$SCRIPTSDIR/linux/sync-pihole-hosts.bash"
 
 prompt_yes_no() {
   read -rp "$1 [y/N] " ans
@@ -135,15 +141,39 @@ done
 # Prompt for manual PIA installation
 echo "Private Internet Access (PIA) VPN isn’t automated."
 echo "You’ll need to grab the Linux installer yourself."
+
+echo "Private Internet Access (PIA) VPN isn’t automated."
+echo "You’ll need to grab the Linux installer yourself."
+
 if prompt_yes_no "Open the PIA download page now?"; then
   if ! xdg-open "https://www.privateinternetaccess.com/download/linux-vpn"; then
     echo "❌ Could not open browser—please visit:"
     echo "    https://www.privateinternetaccess.com/download/linux-vpn"
   fi
+
+  if prompt_yes_no "Once you've downloaded to ~/Downloads, install it now?"; then
+    # Enable nullglob so the pattern disappears if nothing matches
+    shopt -s nullglob
+    installers=( "$HOME/Downloads"/pia-linux-*.run )
+    shopt -u nullglob
+
+    if [ ${#installers[@]} -eq 0 ]; then
+      echo "❌ No PIA installer found in ~/Downloads; skipping installation."
+    else
+      PIA_RUN="${installers[0]}"
+      echo "[+] Installing PIA from $PIA_RUN…"
+      chmod +x "$PIA_RUN"
+      bash "$PIA_RUN"
+      echo "[+] Removing PIA installer…"
+      rm "$PIA_RUN"
+    fi
+  else
+    echo "⏭️  Skipping PIA installation."
+  fi
 else
   echo "⏭️  Skipping PIA download page."
 fi
-echo
+
 
 # Suggest GNOME extensions
 echo "If running GNOME Desktop Environment, consider installing the 'Dash to Dock' and 'system-monitor-next' GNOME extensions."
@@ -168,7 +198,7 @@ fastfetch
 
 # Suggest NVIDIA drivers installation
 echo "If you are running an NVIDIA GPU, consider installing the NVIDIA drivers using the script:"
-echo "          $SCRIPTDIR/linux/fedora/nvidia_drivers.bash (Fedora)"
+echo "          $SCRIPTSDIR/linux/fedora/nvidia_drivers.bash (Fedora)"
 echo "Or go to:"
 echo "          https://www.nvidia.com/en-us/drivers/ for Windows installs"
 echo
