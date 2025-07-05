@@ -93,7 +93,7 @@ prompt_yes_no() {
 
 echo "[+] Running optional helper scripts..."
 
-# proper associative-array syntax: no spaces around the =
+# Build helper lookup
 declare -A HELPERS=(
   ["Add SSH keys to GitHub"]="$KEY_SCRIPT"
   ["Mount shared drive"]="$MNT_SHARED_SCRIPT"
@@ -101,7 +101,16 @@ declare -A HELPERS=(
   ["Sync PiHole hosts"]="$PIHOLE_SCRIPT"
 )
 
-for desc in "${!HELPERS[@]}"; do
+# Declare the order we want
+ORDER=(
+  "Add SSH keys to GitHub"
+  "Mount shared drive"
+  "Set up BitLocker mounts"
+  "Sync PiHole hosts"
+)
+
+# Iterate in that exact order
+for desc in "${ORDER[@]}"; do
   path="${HELPERS[$desc]}"
   if [ -f "$path" ]; then
     if prompt_yes_no "Do you want to ${desc}?"; then
