@@ -210,33 +210,22 @@ done
 echo "Private Internet Access (PIA) VPN isn’t automated."
 echo "You’ll need to grab the Linux installer yourself."
 
-if prompt_yes_no "Open the PIA download page now?"; then
-  if ! xdg-open "https://www.privateinternetaccess.com/download"; then
-    echo "❌ Could not open browser—please visit:"
-    echo "    https://www.privateinternetaccess.com/download"
-  fi
+# Open the URL and background it
+nohup xdg-open "https://www.privateinternetaccess.com/download" &>/dev/null &
+echo "[+] Please download the PIA installer to ~/Downloads and press Enter to continue"
+read -r
 
-  if prompt_yes_no "Once you've downloaded to ~/Downloads, install it now?"; then
-    # Enable nullglob so the pattern disappears if nothing matches
-    shopt -s nullglob
-    installers=( "$HOME/Downloads"/pia-linux-*.run )
-    shopt -u nullglob
-
-    if [ ${#installers[@]} -eq 0 ]; then
-      echo "❌ No PIA installer found in ~/Downloads; skipping installation."
-    else
-      PIA_RUN="${installers[0]}"
-      echo "[+] Installing PIA from $PIA_RUN…"
-      chmod +x "$PIA_RUN"
-      bash "$PIA_RUN"
-      echo "[+] Removing PIA installer…"
-      rm "$PIA_RUN"
-    fi
-  else
-    echo "⏭️  Skipping PIA installation."
-  fi
+# Find and run the installer
+shopt -s nullglob
+installers=( "$HOME/Downloads"/pia-linux-*.run )
+shopt -u nullglob
+if (( ${#installers[@]} )); then
+  echo "[+] Installing PIA from ${installers[0]}…"
+  chmod +x "${installers[0]}"
+  bash "${installers[0]}"
+  rm "${installers[0]}"
 else
-  echo "⏭️  Skipping PIA download page."
+  echo "❌ No PIA installer found—make sure you downloaded it to ~/Downloads"
 fi
 
 
