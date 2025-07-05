@@ -82,6 +82,7 @@ echo "🚀 Starting bootstrap process..."
 
 cd "$HOME"
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/bin:$PATH"
 
 # Run in a subshell with `set +e` so errors never bubble out
 (
