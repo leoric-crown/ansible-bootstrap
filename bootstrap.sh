@@ -181,3 +181,4 @@ echo
 echo "Enjoy your new workstation!"
 echo
 
+exit 0
