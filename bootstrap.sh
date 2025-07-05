@@ -13,8 +13,50 @@ SCRIPTSREPO="https://github.com/leoric-crown/leoric-scripts.git"
 ANSIBLEBRANCH="main"
 SCRIPTBRANCH="main"
 
-if ! grep -qE '^ID=fedora' /etc/os-release; then
-  echo "❌ This bootstrap is only tested on Fedora. Aborting."
+# Detect OS
+OS_TYPE="$(uname -s)"
+PACKAGE_MANAGER=""
+INSTALL_CMD=""
+UPDATE_CMD=""
+
+if [[ "$OS_TYPE" == "Darwin" ]]; then
+  # macOS
+  if ! command -v brew &>/dev/null; then
+    echo "[+] Homebrew not found; installing..."
+    /bin/bash -c "\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    # Add brew to PATH (Apple Silicon vs Intel)
+    eval "\$($(brew --prefix)/bin/brew shellenv)"
+  fi
+  PACKAGE_MANAGER="brew"
+  INSTALL_CMD="brew install"
+  UPDATE_CMD="brew update"
+elif [[ -f /etc/os-release ]]; then
+  # Linux: detect package manager
+  . /etc/os-release
+  case "$ID" in
+    ubuntu|debian)
+      PACKAGE_MANAGER="apt"
+      INSTALL_CMD="sudo apt-get install -y"
+      UPDATE_CMD="sudo apt-get update"
+      ;;
+    fedora|rhel|centos)
+      PACKAGE_MANAGER="dnf"
+      INSTALL_CMD="sudo dnf install -y"
+      UPDATE_CMD="sudo dnf makecache --refresh"
+      ;;
+    arch)
+      PACKAGE_MANAGER="pacman"
+      INSTALL_CMD="sudo pacman -S --noconfirm"
+      UPDATE_CMD="sudo pacman -Sy"
+      ;;
+    *)(
+      echo "❌ Unsupported Linux distribution: $ID" >&2
+      exit 1
+      )
+      ;;
+  esac
+else
+  echo "❌ Unsupported OS: $OS_TYPE" >&2
   exit 1
 fi
 
@@ -26,13 +68,13 @@ for cmd in git curl sudo; do
 done
 
 install_if_missing() {
-  local package="$1"
-  # if ! dnf list --installed "$package" &>/dev/null; then
-  if ! rpm -q "$package" &> /dev/null; then
-    echo "[+] Installing $package..."
-    sudo dnf install -y "$package"
+  local pkg="$1"
+  if ! command -v "$pkg" &>/dev/null; then
+    echo "[+] Installing $pkg..."
+    $UPDATE_CMD
+    $INSTALL_CMD "$pkg"
   else
-    echo "[✓] $package is already installed."
+    echo "[✓] $pkg already installed."
   fi
 }
 
@@ -41,9 +83,6 @@ echo "🚀 Starting bootstrap process..."
 cd "$HOME"
 export PATH="$HOME/.local/bin:$PATH"
 
-# Set dark theme
-echo "[+] Setting dark theme..."
-
 # Run in a subshell with `set +e` so errors never bubble out
 (
   set +e
@@ -51,14 +90,9 @@ echo "[+] Setting dark theme..."
   # Only try gsettings if it exists and there's a session bus
   if command -v gsettings &>/dev/null && [ -S "/run/user/$(id -u)/bus" ]; then
     export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
-
-    # These may still fail, but we swallow any error
-    gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark' \
-      || echo "⚠️  Could not set GTK theme, skipping"
-    gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' \
-      || echo "⚠️  Could not set color scheme, skipping"
-  else
-    echo "⚠️  gsettings or DBus session not available; skipping GTK dark theme"
+    echo "[+] Setting dark theme..."
+    gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark' || true
+    gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' || true
   fi
 )
 
@@ -118,10 +152,14 @@ if [ -d "$SCRIPTSDIR/.git" ]; then
 fi
 
 # Ansible provisioning
-echo "[+] Running Ansible provisioning..."
-export ANSIBLE_INVENTORY_USER="${USER:-$(whoami)}"
-export ANSIBLE_INVENTORY_USER_DIR="/home/$ANSIBLE_INVENTORY_USER"
-ansible-playbook -i "$ANSIBLEDIR/inventory.yml" "$ANSIBLEDIR/playbook.yml" --ask-become-pass
+if [[ "$OS_TYPE" == "Linux" ]]; then
+  echo "[+] Running Ansible provisioning..."
+  export ANSIBLE_INVENTORY_USER="${USER:-$(whoami)}"
+  export ANSIBLE_INVENTORY_USER_DIR="$HOME"
+  ansible-playbook -i "$ANSIBLEDIR/inventory.yml" "$ANSIBLEDIR/playbook.yml" --ask-become-pass
+else
+  echo "[✓] Skipping Ansible provisioning (not Fedora/Linux, Ubuntu and macOS not tested yet)"
+fi
 
 # Helper scripts
 KEY_SCRIPT="$SCRIPTSDIR/github/add-gh-ssh-keys.bash"
@@ -173,9 +211,9 @@ echo "Private Internet Access (PIA) VPN isn’t automated."
 echo "You’ll need to grab the Linux installer yourself."
 
 if prompt_yes_no "Open the PIA download page now?"; then
-  if ! xdg-open "https://www.privateinternetaccess.com/download/linux-vpn"; then
+  if ! xdg-open "https://www.privateinternetaccess.com/download"; then
     echo "❌ Could not open browser—please visit:"
-    echo "    https://www.privateinternetaccess.com/download/linux-vpn"
+    echo "    https://www.privateinternetaccess.com/download"
   fi
 
   if prompt_yes_no "Once you've downloaded to ~/Downloads, install it now?"; then
