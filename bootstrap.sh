@@ -13,6 +13,10 @@ SCRIPTSREPO="https://github.com/leoric-crown/leoric-scripts.git"
 ANSIBLEBRANCH="main"
 SCRIPTBRANCH="main"
 
+if ! grep -qE '^ID=fedora' /etc/os-release; then
+  echo "❌ This bootstrap is only tested on Fedora. Aborting."
+  exit 1
+fi
 
 install_if_missing() {
   local package="$1"
