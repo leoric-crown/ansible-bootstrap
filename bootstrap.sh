@@ -185,8 +185,8 @@ declare -A HELPERS=(
 # Declare the order we want
 ORDER=(
   "Add SSH keys to GitHub"
-  "Mount shared drive (Linux only)"
-  "Set up BitLocker mounts (Linux with Windows dual-boot)"
+  "Mount shared drive"
+  "Set up BitLocker mounts"
   "Sync PiHole hosts"
 )
 
