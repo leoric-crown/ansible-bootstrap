@@ -229,8 +229,7 @@ echo
 echo "For good measure, do this after rebooting and upgrading kernel."
 echo
 
-echo "✓ Done! To apply your new login shell and desktop entries, log out and back in, or run:"
-echo "    exec \$SHELL -l"
+echo "✓ Done! To apply your new login shell and desktop entries, log out and back in (or reboot)."
 echo
 echo "Enjoy your new workstation!"
 echo
