@@ -288,6 +288,7 @@ echo
 
 echo "If you want to install Cosmic DE on Fedora 41+, use:"
 echo "		sudo dnf install @cosmic-desktop-environment"
+echo "See https://copr.fedorainfracloud.org/coprs/ryanabx/cosmic-epoch/ for more details"
 echo
 
 echo "✓ Done! To apply your new login shell and desktop entries, log out and back in (or reboot)."
