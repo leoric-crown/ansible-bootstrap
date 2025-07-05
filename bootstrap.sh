@@ -146,7 +146,7 @@ fastfetch
 # Suggest NVIDIA drivers installation
 echo "If you are running an NVIDIA GPU, consider installing the NVIDIA drivers using the script:"
 echo "          $SCRIPTDIR/linux/fedora/nvidia_drivers.bash (Fedora)"
-echo "For good measure, do this after rebooting."
+echo "For good measure, do this after rebooting and upgrading kernel."
 echo "Or go to:"
 echo "          https://www.nvidia.com/en-us/drivers/ for Windows installs"
 echo
