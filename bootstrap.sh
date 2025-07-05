@@ -19,7 +19,7 @@ if ! grep -qE '^ID=fedora' /etc/os-release; then
 fi
 
 for cmd in git curl sudo; do
-  if ! command -v $cmd &>/dev/null; then
+  if ! command -v "$cmd" &>/dev/null; then
     echo "❌ $cmd is required but not installed. Please install it first."
     exit 1
   fi
@@ -91,13 +91,6 @@ else
   echo "[✓] $ANSIBLEDIR already exists, skipping clone."
 fi
 
-if [ -d "$ANSIBLEDIR/.git" ]; then
-  echo "[+] Force-syncing ansible repo to origin/$ANSIBLEBRANCH…"
-  git -C "$ANSIBLEDIR" fetch origin "$ANSIBLEBRANCH"
-  git -C "$ANSIBLEDIR" checkout "$ANSIBLEBRANCH"
-  git -C "$ANSIBLEDIR" reset --hard "origin/$ANSIBLEBRANCH"
-fi
-
 # Scripts repo
 echo "[+] Cloning leoric-scripts repo (branch: $SCRIPTBRANCH)…"
 if [ ! -d "$SCRIPTSDIR/.git" ]; then
@@ -107,11 +100,21 @@ else
   echo "[✓] $SCRIPTSDIR already exists, skipping clone."
 fi
 
+sync_repo() {
+  local url=$1 dir=$2 branch=$3
+  if [ ! -d "$dir/.git" ]; then
+    git clone --branch "$branch" "$url" "$dir"
+  else
+    git -C "$dir" fetch origin "$branch"
+    git -C "$dir" checkout "$branch"
+    git -C "$dir" reset --hard "origin/$branch"
+  fi
+}
+if [ -d "$ANSIBLEDIR/.git" ]; then
+  sync_repo "$ANSIBLEREPO" "$ANSIBLEDIR" "$ANSIBLEBRANCH"
+fi
 if [ -d "$SCRIPTSDIR/.git" ]; then
-  echo "[+] Force-syncing leoric-scripts repo to origin/$SCRIPTBRANCH…"
-  git -C "$SCRIPTSDIR" fetch origin "$SCRIPTBRANCH"
-  git -C "$SCRIPTSDIR" checkout "$SCRIPTBRANCH"
-  git -C "$SCRIPTSDIR" reset --hard "origin/$SCRIPTBRANCH"
+  sync_repo "$SCRIPTSREPO" "$SCRIPTSDIR" "$SCRIPTBRANCH"
 fi
 
 # Ansible provisioning
@@ -144,8 +147,8 @@ declare -A HELPERS=(
 # Declare the order we want
 ORDER=(
   "Add SSH keys to GitHub"
-  "Mount shared drive"
-  "Set up BitLocker mounts"
+  "Mount shared drive (Linux only)"
+  "Set up BitLocker mounts (Linux with Windows dual-boot)"
   "Sync PiHole hosts"
 )
 
@@ -166,9 +169,6 @@ for desc in "${ORDER[@]}"; do
 done
 
 # Prompt for manual PIA installation
-echo "Private Internet Access (PIA) VPN isn’t automated."
-echo "You’ll need to grab the Linux installer yourself."
-
 echo "Private Internet Access (PIA) VPN isn’t automated."
 echo "You’ll need to grab the Linux installer yourself."
 
