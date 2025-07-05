@@ -23,6 +23,9 @@ install_if_missing() {
 
 echo "🚀 Starting bootstrap process..."
 
+cd "$HOME"
+export PATH="$HOME/.local/bin:$PATH"
+
 # Set dark theme
 echo "[+] Setting dark theme..."
 gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
@@ -35,8 +38,6 @@ install_if_missing gh
 # Ensure chezmoi is installed
 echo "[+] Ensuring chezmoi is installed/up-to-date..."
 curl -fsLS get.chezmoi.io | sh
-
-export PATH="$HOME/.local/bin:$PATH"
 
 # Ensure GitHub CLI is authenticated
 echo "[+] Checking GitHub authentication..."
