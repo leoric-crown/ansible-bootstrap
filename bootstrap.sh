@@ -32,8 +32,24 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # Set dark theme
 echo "[+] Setting dark theme..."
-gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
-gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+
+# Run in a subshell with `set +e` so errors never bubble out
+(
+  set +e
+
+  # Only try gsettings if it exists and there's a session bus
+  if command -v gsettings &>/dev/null && [ -S "/run/user/$(id -u)/bus" ]; then
+    export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
+
+    # These may still fail, but we swallow any error
+    gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark' \
+      || echo "⚠️  Could not set GTK theme, skipping"
+    gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' \
+      || echo "⚠️  Could not set color scheme, skipping"
+  else
+    echo "⚠️  gsettings or DBus session not available; skipping GTK dark theme"
+  fi
+)
 
 # Ensure Ansible is installed
 install_if_missing ansible
@@ -187,10 +203,7 @@ else
 fi
 
 # Make sure fastfetch is installed
-if ! command -v fastfetch >/dev/null 2>&1; then
-  echo "⚠️  fastfetch not found—installing now…"
-  sudo dnf install -y fastfetch
-fi
+install_if_missing fastfetch
 
 # Now safely run fastfetch
 echo "[+] Displaying system info with fastfetch"
