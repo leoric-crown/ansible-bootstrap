@@ -174,7 +174,8 @@ else
 fi
 
 # Helper scripts
-KEY_SCRIPT="$SCRIPTSDIR/github/add-gh-ssh-keys.bash"
+GH_KEYS_SCRIPT="$SCRIPTSDIR/ssh/add-gh-ssh-keys.bash"
+PI_KEYS_SCRIPT="$SCRIPTSDIR/ssh/add-pi-ssh-keys.bash"
 MNT_SHARED_SCRIPT="$SCRIPTSDIR/linux/fedora/mnt_shared.bash"
 BITLOCKER_SCRIPT="$SCRIPTSDIR/linux/bitlocker/bitlocker-setup.bash"
 PIHOLE_SCRIPT="$SCRIPTSDIR/linux/sync-pihole-hosts.bash"
@@ -188,7 +189,8 @@ echo "[+] Running optional helper scripts..."
 
 # Build helper lookup
 declare -A HELPERS=(
-  ["Add SSH keys to GitHub"]="$KEY_SCRIPT"
+  ["Add SSH keys to GitHub"]="$GH_KEYS_SCRIPT"
+  ["Add SSH keys to Pis"]="$PI_KEYS_SCRIPT"
   ["Mount shared drive"]="$MNT_SHARED_SCRIPT"
   ["Set up BitLocker mounts"]="$BITLOCKER_SCRIPT"
   ["Sync PiHole hosts"]="$PIHOLE_SCRIPT"
@@ -197,6 +199,7 @@ declare -A HELPERS=(
 # Declare the order we want
 ORDER=(
   "Add SSH keys to GitHub"
+  "Add SSH keys to Pis"
   "Mount shared drive"
   "Set up BitLocker mounts"
   "Sync PiHole hosts"
@@ -220,26 +223,39 @@ done
 
 # Prompt for manual PIA installation
 echo "Private Internet Access (PIA) VPN isn’t automated."
-echo "You’ll need to grab the Linux installer yourself."
+echo "You’ll need to grab the installer yourself."
 
 # Open the URL and background it
 nohup xdg-open "https://www.privateinternetaccess.com/download" &>/dev/null &
-echo "[+] Please download the PIA installer to ~/Downloads and press Enter to continue"
-read -r
 
-# Find and run the installer
-shopt -s nullglob
-installers=( "$HOME/Downloads"/pia-linux-*.run )
-shopt -u nullglob
-if (( ${#installers[@]} )); then
-  echo "[+] Installing PIA from ${installers[0]}…"
-  chmod +x "${installers[0]}"
-  bash "${installers[0]}"
-  rm "${installers[0]}"
+# Prompt user to download
+echo "[+] Please download the PIA installer to ~/Downloads and press Enter to continue, or type 'N' to skip installation:"
+read -r response
+
+# Skip if response starts with N/n
+if [[ "$response" =~ ^[Nn] ]]; then
+  echo "[⏩] Skipping PIA installation."
 else
-  echo "❌ No PIA installer found—make sure you downloaded it to ~/Downloads"
+  # Find and run the installer
+  shopt -s nullglob
+  installers=( "$HOME/Downloads"/pia-linux-*.run )
+  shopt -u nullglob
+  if (( ${#installers[@]} )); then
+    echo "[+] Installing PIA from ${installers[0]}…"
+    chmod +x "${installers[0]}"
+    set +e  # Allow the script to continue even if the installer fails
+    bash "${installers[0]}"
+    install_exit=$?
+    set -e
+    if [[ $install_exit -ne 0 ]]; then
+      echo "⚠️  PIA installer exited with code $install_exit (continuing anyway)"
+    fi
+    rm "${installers[0]}"
+  else
+    echo "❌ No PIA installer found—make sure you downloaded it to ~/Downloads"
+  fi
 fi
-
+echo
 
 # Suggest GNOME extensions
 echo "If running GNOME Desktop Environment, consider installing the 'Dash to Dock' and 'system-monitor-next' GNOME extensions."
@@ -251,6 +267,7 @@ if prompt_yes_no "Do you want to open their pages?"; then
 else
   echo "⏭️  Skipping GNOME extensions pages."
 fi
+echo
 
 # Make sure fastfetch is installed
 install_if_missing fastfetch
@@ -258,6 +275,7 @@ install_if_missing fastfetch
 # Now safely run fastfetch
 echo "[+] Displaying system info with fastfetch"
 fastfetch
+echo
 
 # Suggest NVIDIA drivers installation
 echo "If you are running an NVIDIA GPU, consider installing the NVIDIA drivers using the script:"
