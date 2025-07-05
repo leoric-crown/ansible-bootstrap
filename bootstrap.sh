@@ -18,6 +18,13 @@ if ! grep -qE '^ID=fedora' /etc/os-release; then
   exit 1
 fi
 
+for cmd in git curl sudo; do
+  if ! command -v $cmd &>/dev/null; then
+    echo "❌ $cmd is required but not installed. Please install it first."
+    exit 1
+  fi
+done
+
 install_if_missing() {
   local package="$1"
   # if ! dnf list --installed "$package" &>/dev/null; then
