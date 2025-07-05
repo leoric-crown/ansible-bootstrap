@@ -156,7 +156,14 @@ else
   echo "⏭️  Skipping GNOME extensions pages."
 fi
 
-# Display System information using fastfetch
+# Make sure fastfetch is installed
+if ! command -v fastfetch >/dev/null 2>&1; then
+  echo "⚠️  fastfetch not found—installing now…"
+  sudo dnf install -y fastfetch
+fi
+
+# Now safely run fastfetch
+echo "[+] Displaying system info with fastfetch"
 fastfetch
 
 # Suggest NVIDIA drivers installation
