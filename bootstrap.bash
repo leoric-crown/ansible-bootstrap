@@ -286,6 +286,10 @@ echo
 echo "For good measure, do this after rebooting and upgrading kernel."
 echo
 
+echo "If you want to install Cosmic DE on Fedora 41+, use:"
+echo "		sudo dnf install @cosmic-desktop-environment"
+echo
+
 echo "✓ Done! To apply your new login shell and desktop entries, log out and back in (or reboot)."
 echo
 echo "Enjoy your new workstation!"
