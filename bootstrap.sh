@@ -3,6 +3,17 @@ set -euo pipefail
 
 trap 'echo "❌ Error on line $LINENO"' ERR
 
+# Cache sudo credentials at script start
+echo "[+] Caching sudo credentials..."
+sudo -v
+
+# Keep-alive: update existing sudo timestamp until script finishes
+while true; do sudo -n true; sleep 60; done 2>/dev/null &
+SUDO_LOOP_PID=$!
+
+# Ensure the loop is killed on script exit
+trap 'kill "$SUDO_LOOP_PID"' EXIT
+
 ANSIBLEDIR="$HOME/ansible"
 SCRIPTSDIR="$HOME/scripts"
 
