@@ -16,5 +16,5 @@ This script automates:
 Run this on a freshly installed Fedora system:
 
 ```bash
-bash <(curl -fsSL "https://raw.githubusercontent.com/leoric-crown/ansible-bootstrap/main/bootstrap.sh?nocache=$(date +%s)")
+bash <(curl -fsSL "https://raw.githubusercontent.com/leoric-crown/ansible-bootstrap/main/bootstrap.bash?nocache=$(date +%s)")
 ```
