@@ -191,7 +191,7 @@ GH_KEYS_SCRIPT="$SCRIPTSDIR/ssh/add-gh-ssh-keys.bash"
 PI_KEYS_SCRIPT="$SCRIPTSDIR/ssh/add-pi-ssh-keys.bash"
 MNT_SHARED_SCRIPT="$SCRIPTSDIR/linux/fedora/mnt_shared.bash"
 BITLOCKER_SCRIPT="$SCRIPTSDIR/linux/bitlocker/bitlocker-setup.bash"
-# BRIDGE_SCRIPT="$SCRIPTSDIR/linux/fedora/br0.bash"
+# BRIDGE_SCRIPT="$SCRIPTSDIR/linux/fedora/br0.bash" # TODO
 PIHOLE_SCRIPT="$SCRIPTSDIR/linux/sync-pihole-hosts.bash"
 
 echo "[+] Running optional helper scripts..."
@@ -202,7 +202,7 @@ declare -A HELPERS=(
   ["Add SSH keys to Pis"]="$PI_KEYS_SCRIPT"
   ["Mount Samba share"]="$MNT_SHARED_SCRIPT"
   ["Set up BitLocker mounts"]="$BITLOCKER_SCRIPT"
-  # ["Set up br0 bridge interface"]="$BRIDGE_SCRIPT"
+  # ["Set up br0 bridge interface"]="$BRIDGE_SCRIPT" # TODO
   ["Sync PiHole hosts"]="$PIHOLE_SCRIPT"
 )
 
@@ -212,7 +212,7 @@ ORDER=(
   "Add SSH keys to Pis"
   "Mount Samba share"
   "Set up BitLocker mounts"
-  # "Set up br0 bridge interface"
+  # "Set up br0 bridge interface" # TODO
   "Sync PiHole hosts"
 )
 
@@ -233,8 +233,8 @@ for desc in "${ORDER[@]}"; do
 done
 
 # Prompt for manual PIA installation
-echo "Private Internet Access (PIA) VPN isn’t automated."
-echo "You’ll need to grab the installer yourself."
+echo "Private Internet Access (PIA) VPN isn't automated."
+echo "You'll need to grab the installer yourself."
 
 # Open the URL and background it
 nohup xdg-open "https://www.privateinternetaccess.com/download" &>/dev/null &
