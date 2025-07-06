@@ -30,6 +30,32 @@ PACKAGE_MANAGER=""
 INSTALL_CMD=""
 UPDATE_CMD=""
 
+install_if_missing() {
+  local pkg="$1"
+  if ! command -v "$pkg" &>/dev/null; then
+    echo "[+] Installing $pkg..."
+    $INSTALL_CMD "$pkg"
+  else
+    echo "[✓] $pkg already installed."
+  fi
+}
+
+sync_repo() {
+  local url=$1 dir=$2 branch=$3
+  if [ ! -d "$dir/.git" ]; then
+    git clone --branch "$branch" "$url" "$dir"
+  else
+    git -C "$dir" fetch origin "$branch"
+    git -C "$dir" checkout "$branch"
+    git -C "$dir" reset --hard "origin/$branch"
+  fi
+}
+
+prompt_yes_no() {
+  read -rp "$1 [y/N] " ans
+  [[ $ans =~ ^[Yy]$ ]]
+}
+
 if [[ "$OS_TYPE" == "Darwin" ]]; then
   # macOS
   if ! command -v brew &>/dev/null; then
@@ -79,17 +105,6 @@ for cmd in git curl sudo; do
   fi
 done
 
-install_if_missing() {
-  local pkg="$1"
-  if ! command -v "$pkg" &>/dev/null; then
-    echo "[+] Installing $pkg..."
-    $UPDATE_CMD
-    $INSTALL_CMD "$pkg"
-  else
-    echo "[✓] $pkg already installed."
-  fi
-}
-
 echo "🚀 Starting bootstrap process..."
 
 cd "$HOME"
@@ -109,10 +124,13 @@ export PATH="$HOME/bin:$PATH"
   fi
 )
 
+echo "[+] Updating package list..."
+$UPDATE_CMD
 # Ensure Ansible is installed
 install_if_missing ansible
 # Ensure GitHub CLI is installed
 install_if_missing gh
+
 # Ensure chezmoi is installed
 echo "[+] Ensuring chezmoi is installed/up-to-date..."
 curl -fsLS get.chezmoi.io | sh
@@ -147,16 +165,6 @@ else
   echo "[✓] $SCRIPTSDIR already exists, skipping clone."
 fi
 
-sync_repo() {
-  local url=$1 dir=$2 branch=$3
-  if [ ! -d "$dir/.git" ]; then
-    git clone --branch "$branch" "$url" "$dir"
-  else
-    git -C "$dir" fetch origin "$branch"
-    git -C "$dir" checkout "$branch"
-    git -C "$dir" reset --hard "origin/$branch"
-  fi
-}
 if [ -d "$ANSIBLEDIR/.git" ]; then
   sync_repo "$ANSIBLEREPO" "$ANSIBLEDIR" "$ANSIBLEBRANCH"
 fi
@@ -183,12 +191,8 @@ GH_KEYS_SCRIPT="$SCRIPTSDIR/ssh/add-gh-ssh-keys.bash"
 PI_KEYS_SCRIPT="$SCRIPTSDIR/ssh/add-pi-ssh-keys.bash"
 MNT_SHARED_SCRIPT="$SCRIPTSDIR/linux/fedora/mnt_shared.bash"
 BITLOCKER_SCRIPT="$SCRIPTSDIR/linux/bitlocker/bitlocker-setup.bash"
+# BRIDGE_SCRIPT="$SCRIPTSDIR/linux/fedora/br0.bash"
 PIHOLE_SCRIPT="$SCRIPTSDIR/linux/sync-pihole-hosts.bash"
-
-prompt_yes_no() {
-  read -rp "$1 [y/N] " ans
-  [[ $ans =~ ^[Yy]$ ]]
-}
 
 echo "[+] Running optional helper scripts..."
 
@@ -196,8 +200,9 @@ echo "[+] Running optional helper scripts..."
 declare -A HELPERS=(
   ["Add SSH keys to GitHub"]="$GH_KEYS_SCRIPT"
   ["Add SSH keys to Pis"]="$PI_KEYS_SCRIPT"
-  ["Mount shared drive"]="$MNT_SHARED_SCRIPT"
+  ["Mount Samba share"]="$MNT_SHARED_SCRIPT"
   ["Set up BitLocker mounts"]="$BITLOCKER_SCRIPT"
+  # ["Set up br0 bridge interface"]="$BRIDGE_SCRIPT"
   ["Sync PiHole hosts"]="$PIHOLE_SCRIPT"
 )
 
@@ -205,8 +210,9 @@ declare -A HELPERS=(
 ORDER=(
   "Add SSH keys to GitHub"
   "Add SSH keys to Pis"
-  "Mount shared drive"
+  "Mount Samba share"
   "Set up BitLocker mounts"
+  # "Set up br0 bridge interface"
   "Sync PiHole hosts"
 )
 
@@ -232,6 +238,7 @@ echo "You’ll need to grab the installer yourself."
 
 # Open the URL and background it
 nohup xdg-open "https://www.privateinternetaccess.com/download" &>/dev/null &
+nohup xdg-open "https://www.privateinternetaccess.com/download/linux" &>/dev/null &
 
 # Prompt user to download
 echo "[+] Please download the PIA installer to ~/Downloads and press Enter to continue, or type 'N' to skip installation:"
@@ -291,6 +298,7 @@ echo
 echo "For good measure, do this after rebooting and upgrading kernel."
 echo
 
+# Suggest COSMIC DE installation
 echo "If you want to install Cosmic DE on Fedora 41+, use:"
 echo "		sudo dnf install @cosmic-desktop-environment"
 echo "See https://copr.fedorainfracloud.org/coprs/ryanabx/cosmic-epoch/ for more details"
