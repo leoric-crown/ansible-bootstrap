@@ -68,6 +68,7 @@ elif [[ -f /etc/os-release ]]; then
   esac
 else
   echo "❌ Unsupported OS: $OS_TYPE" >&2
+  echo "Supported OS: macOS, Linux (Fedora, Ubuntu, Debian, Arch)"
   exit 1
 fi
 
@@ -279,7 +280,7 @@ echo
 
 # Suggest NVIDIA drivers installation
 echo "If you are running an NVIDIA GPU, consider installing the NVIDIA drivers using the script:"
-echo "          $SCRIPTSDIR/linux/fedora/nvidia_drivers.bash (Fedora)"
+echo "          $SCRIPTSDIR/linux/fedora/nvidia_drivers.bash (only tested on Fedora 42+)"
 echo "Or go to:"
 echo "          https://www.nvidia.com/en-us/drivers/ for Windows installs"
 echo
