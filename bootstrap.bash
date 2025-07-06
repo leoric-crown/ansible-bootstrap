@@ -174,6 +174,10 @@ else
   echo "[✓] Skipping Ansible provisioning (not Fedora/Linux, Ubuntu and macOS not tested yet)"
 fi
 
+# Apply chezmoi config
+echo "[+] Running chezmoi config..."
+chezmoi apply
+
 # Helper scripts
 GH_KEYS_SCRIPT="$SCRIPTSDIR/ssh/add-gh-ssh-keys.bash"
 PI_KEYS_SCRIPT="$SCRIPTSDIR/ssh/add-pi-ssh-keys.bash"
