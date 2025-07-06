@@ -238,7 +238,8 @@ echo "You’ll need to grab the installer yourself."
 
 # Open the URL and background it
 nohup xdg-open "https://www.privateinternetaccess.com/download" &>/dev/null &
-nohup xdg-open "https://www.privateinternetaccess.com/download/linux" &>/dev/null &
+sleep 0.3
+nohup xdg-open "https://www.privateinternetaccess.com/download/linux-vpn" &>/dev/null &
 
 # Prompt user to download
 echo "[+] Please download the PIA installer to ~/Downloads and press Enter to continue, or type 'N' to skip installation:"
