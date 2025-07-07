@@ -90,6 +90,10 @@ fi
 
 echo "🚀 Starting bootstrap process..."
 
+echo "Found package manager: $PACKAGE_MANAGER"
+echo "Found install command: $INSTALL_CMD"
+echo "Found update command: $UPDATE_CMD"
+
 echo "[+] Updating package list..."
 $UPDATE_CMD
 
