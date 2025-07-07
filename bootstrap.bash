@@ -30,16 +30,6 @@ PACKAGE_MANAGER=""
 INSTALL_CMD=""
 UPDATE_CMD=""
 
-install_if_missing() {
-  local pkg="$1"
-  if ! command -v "$pkg" &>/dev/null; then
-    echo "[+] Installing $pkg..."
-    $INSTALL_CMD "$pkg"
-  else
-    echo "[✓] $pkg already installed."
-  fi
-}
-
 sync_repo() {
   local url=$1 dir=$2 branch=$3
   if [ ! -d "$dir/.git" ]; then
@@ -102,6 +92,16 @@ echo "🚀 Starting bootstrap process..."
 
 echo "[+] Updating package list..."
 $UPDATE_CMD
+
+install_if_missing() {
+  local pkg="$1"
+  if ! command -v "$pkg" &>/dev/null; then
+    echo "[+] Installing $pkg..."
+    $INSTALL_CMD "$pkg"
+  else
+    echo "[✓] $pkg already installed."
+  fi
+}
 
 # Ensure required commands are installed
 install_if_missing git
