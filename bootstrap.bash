@@ -7,8 +7,9 @@ trap 'echo "❌ Error on line $LINENO"' ERR
 echo "[+] Caching sudo credentials..."
 sudo -v
 
-# Keep-alive: update existing sudo timestamp until script finishes
-while true; do sudo -n true; sleep 60; done 2>/dev/null &
+# Detach the keepalive loop’s stdin *and* capture its PID
+while true; do sudo -n true; sleep 60; done \
+  2>/dev/null </dev/null &
 SUDO_LOOP_PID=$!
 
 # Ensure the loop is killed on script exit
@@ -42,7 +43,7 @@ sync_repo() {
 }
 
 prompt_yes_no() {
-  read -rp "$1 [y/N] " ans
+  read -rp "$1 [y/N] " ans < /dev/tty
   [[ $ans =~ ^[Yy]$ ]]
 }
 
