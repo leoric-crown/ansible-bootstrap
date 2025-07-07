@@ -136,10 +136,34 @@ export PATH="$HOME/bin:$PATH"
   fi
 )
 
-# Ensure Ansible is installed
+# Ensure Ansible is installed everywhere
 install_if_missing ansible
-# Ensure GitHub CLI is installed
-install_if_missing gh
+
+# Install GitHub CLI (gh)
+if [[ "$PACKAGE_MANAGER" == "apt" ]]; then
+  # Debian/Ubuntu: use the official .deb repo, not the snap
+  if ! command -v gh &>/dev/null; then
+    echo "[+] Installing GitHub CLI via APT…"
+
+    # Only add keyring & repo if we haven’t already
+    if [[ ! -f /etc/apt/sources.list.d/github-cli.list ]]; then
+      wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+        | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+      echo "deb [arch=$(dpkg --print-architecture) \
+        signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] \
+        https://cli.github.com/packages stable main" \
+        | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+      $UPDATE_CMD
+    fi
+
+    $INSTALL_CMD gh
+  else
+    echo "[✓] gh already installed (via APT)."
+  fi
+else
+  # Fedora, RHEL, Arch, etc.: fall back to your generic installer
+  install_if_missing gh
+fi
 
 # Ensure chezmoi is installed
 echo "[+] Ensuring chezmoi is installed/up-to-date..."
