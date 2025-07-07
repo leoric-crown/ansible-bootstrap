@@ -201,10 +201,10 @@ chezmoi apply
 INIT_GH_CONFIG_SCRIPT="$SCRIPTSDIR/linux/init-gh-config.bash"
 GH_KEYS_SCRIPT="$SCRIPTSDIR/ssh/add-gh-ssh-keys.bash"
 PI_KEYS_SCRIPT="$SCRIPTSDIR/ssh/add-pi-ssh-keys.bash"
+PIHOLE_SCRIPT="$SCRIPTSDIR/linux/sync-pihole-hosts.bash"
 MNT_SHARED_SCRIPT="$SCRIPTSDIR/linux/fedora/mnt_shared.bash"
 BITLOCKER_SCRIPT="$SCRIPTSDIR/linux/bitlocker/bitlocker-setup.bash"
 # BRIDGE_SCRIPT="$SCRIPTSDIR/linux/fedora/br0.bash" # TODO
-PIHOLE_SCRIPT="$SCRIPTSDIR/linux/sync-pihole-hosts.bash"
 
 echo "[+] Running optional helper scripts..."
 
@@ -213,9 +213,9 @@ declare -A HELPERS=(
   ["Initialize GitHub config"]="$INIT_GH_CONFIG_SCRIPT"
   ["Add SSH keys to GitHub"]="$GH_KEYS_SCRIPT"
   ["Add SSH keys to Pis"]="$PI_KEYS_SCRIPT"
+  ["Sync PiHole hosts"]="$PIHOLE_SCRIPT"
   ["Mount Samba share"]="$MNT_SHARED_SCRIPT"
   ["Set up BitLocker mounts"]="$BITLOCKER_SCRIPT"
-  ["Sync PiHole hosts"]="$PIHOLE_SCRIPT"
 )
 # ["Set up br0 bridge interface"]="$BRIDGE_SCRIPT" # TODO
 
@@ -225,9 +225,9 @@ ORDER=(
   "Initialize GitHub config"
   "Add SSH keys to GitHub"
   "Add SSH keys to Pis"
+  "Sync PiHole hosts"
   "Mount Samba share"
   "Set up BitLocker mounts"
-  "Sync PiHole hosts"
 )
 # "Set up br0 bridge interface" # TODO
 
