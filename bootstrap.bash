@@ -213,9 +213,10 @@ declare -A HELPERS=(
   ["Add SSH keys to Pis"]="$PI_KEYS_SCRIPT"
   ["Mount Samba share"]="$MNT_SHARED_SCRIPT"
   ["Set up BitLocker mounts"]="$BITLOCKER_SCRIPT"
-  # ["Set up br0 bridge interface"]="$BRIDGE_SCRIPT" # TODO
   ["Sync PiHole hosts"]="$PIHOLE_SCRIPT"
 )
+# ["Set up br0 bridge interface"]="$BRIDGE_SCRIPT" # TODO
+
 
 # Declare the order we want
 ORDER=(
@@ -223,9 +224,10 @@ ORDER=(
   "Add SSH keys to Pis"
   "Mount Samba share"
   "Set up BitLocker mounts"
-  # "Set up br0 bridge interface" # TODO
   "Sync PiHole hosts"
 )
+# "Set up br0 bridge interface" # TODO
+
 
 # Iterate in that exact order
 for desc in "${ORDER[@]}"; do
