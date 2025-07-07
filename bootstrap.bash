@@ -198,6 +198,7 @@ echo "[+] Running chezmoi config..."
 chezmoi apply
 
 # Helper scripts
+INIT_GH_CONFIG_SCRIPT="$SCRIPTSDIR/linux/init-gh-config.bash"
 GH_KEYS_SCRIPT="$SCRIPTSDIR/ssh/add-gh-ssh-keys.bash"
 PI_KEYS_SCRIPT="$SCRIPTSDIR/ssh/add-pi-ssh-keys.bash"
 MNT_SHARED_SCRIPT="$SCRIPTSDIR/linux/fedora/mnt_shared.bash"
@@ -209,6 +210,7 @@ echo "[+] Running optional helper scripts..."
 
 # Build helper lookup
 declare -A HELPERS=(
+  ["Initialize GitHub config"]="$INIT_GH_CONFIG_SCRIPT"
   ["Add SSH keys to GitHub"]="$GH_KEYS_SCRIPT"
   ["Add SSH keys to Pis"]="$PI_KEYS_SCRIPT"
   ["Mount Samba share"]="$MNT_SHARED_SCRIPT"
@@ -220,6 +222,7 @@ declare -A HELPERS=(
 
 # Declare the order we want
 ORDER=(
+  "Initialize GitHub config"
   "Add SSH keys to GitHub"
   "Add SSH keys to Pis"
   "Mount Samba share"
