@@ -56,6 +56,21 @@ prompt_yes_no() {
   [[ $ans =~ ^[Yy]$ ]]
 }
 
+echo "[+] Updating package list..."
+$UPDATE_CMD
+
+# Ensure required commands are installed
+install_if_missing git
+install_if_missing curl
+install_if_missing sudo
+
+for cmd in git curl sudo; do
+  if ! command -v "$cmd" &>/dev/null; then
+    echo "❌ $cmd is required but not installed. Please install it first."
+    exit 1
+  fi
+done
+
 if [[ "$OS_TYPE" == "Darwin" ]]; then
   # macOS
   if ! command -v brew &>/dev/null; then
@@ -98,13 +113,6 @@ else
   exit 1
 fi
 
-for cmd in git curl sudo; do
-  if ! command -v "$cmd" &>/dev/null; then
-    echo "❌ $cmd is required but not installed. Please install it first."
-    exit 1
-  fi
-done
-
 echo "🚀 Starting bootstrap process..."
 
 cd "$HOME"
@@ -124,8 +132,6 @@ export PATH="$HOME/bin:$PATH"
   fi
 )
 
-echo "[+] Updating package list..."
-$UPDATE_CMD
 # Ensure Ansible is installed
 install_if_missing ansible
 # Ensure GitHub CLI is installed

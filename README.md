@@ -18,3 +18,9 @@ Run this on a freshly installed Fedora system:
 ```bash
 bash <(curl -fsSL "https://raw.githubusercontent.com/leoric-crown/ansible-bootstrap/main/bootstrap.bash?nocache=$(date +%s)")
 ```
+
+or if curl is not available:
+
+```bash
+wget -qO- "https://raw.githubusercontent.com/leoric-crown/ansible-bootstrap/main/bootstrap.bash?nocache=$(date +%s)" | bash
+```
