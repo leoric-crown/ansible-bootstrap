@@ -293,13 +293,20 @@ else
 fi
 echo
 
-# Make sure fastfetch is installed
-install_if_missing fastfetch
+if [[ "$PACKAGE_MANAGER" != "apt" ]]; then
+  # Make sure fastfetch is installed
+  install_if_missing fastfetch
+  echo "[+] Displaying system info with fastfetch"
+  fastfetch
+  echo
+else
+  # Fall back to neofetch
+  install_if_missing neofetch
+  echo "[+] Displaying system info with neofetch"
+  neofetch
+  echo
+fi
 
-# Now safely run fastfetch
-echo "[+] Displaying system info with fastfetch"
-fastfetch
-echo
 
 # Suggest NVIDIA drivers installation
 echo "If you are running an NVIDIA GPU, consider installing the NVIDIA drivers using the script:"
