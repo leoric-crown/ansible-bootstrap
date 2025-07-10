@@ -191,14 +191,6 @@ else
   echo "[✓] SSH key already loaded in agent"
 fi
 
-# Upload to GitHub via gh CLI (only if not already uploaded)
-if ! gh ssh-key list | grep -q "$(cut -d' ' -f2 < "$SSH_PUB_PATH")"; then
-  echo "[+] Uploading SSH public key to GitHub..."
-  gh ssh-key add "$SSH_PUB_PATH" --title "bootstrap@$(hostname) $(date +%Y-%m-%d)"
-else
-  echo "[✓] SSH public key already uploaded to GitHub"
-fi
-
 # Ensure SSH config for GitHub uses this key
 SSH_CONFIG_ENTRY=$(cat <<EOF
 Host github.com
