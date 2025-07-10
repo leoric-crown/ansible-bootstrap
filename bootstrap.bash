@@ -184,13 +184,15 @@ EOF
 )
 
 mkdir -p ~/.ssh
+touch ~/.ssh/config
+chmod 600 ~/.ssh/config
 if ! grep -q "$SSH_KEY_PATH" ~/.ssh/config 2>/dev/null; then
   echo "[+] Adding SSH config for github.com..."
   echo "$SSH_CONFIG_ENTRY" >> ~/.ssh/config
 else
   echo "[✓] SSH config for github.com already set"
 fi
-chmod 600 ~/.ssh/config
+echo "[✓] SSH config for github.com set. Key fingerprint: $(ssh-keygen -lf "$SSH_PUB_PATH")"
 
 # 5. Set GitHub CLI to SSH and verify
 echo "[+] Ensuring GitHub CLI uses SSH..."
