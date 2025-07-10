@@ -153,7 +153,7 @@ curl -fsLS get.chezmoi.io | sh
 
 echo "[+] Setting up SSH key for GitHub..."
 
-# 1. Generate the SSH key if it doesn't exist
+# Generate the SSH key if it doesn't exist
 if [ ! -f "$SSH_KEY_PATH" ]; then
   echo "[+] Generating new SSH key at $SSH_KEY_PATH..."
   ssh-keygen -t ed25519 -C "leoric@$(hostname)" -f "$SSH_KEY_PATH" -N ""
@@ -161,11 +161,21 @@ else
   echo "[✓] SSH key already exists at $SSH_KEY_PATH"
 fi
 
-# 2. Add to ssh-agent
-eval "$(ssh-agent -s)" >/dev/null
-ssh-add "$SSH_KEY_PATH"
+# Add to ssh-agent
+if [[ ! -S "$SSH_AUTH_SOCK" ]]; then
+  echo "[+] Starting new ssh-agent..."
+  eval "$(ssh-agent -s)" >/dev/null
+fi
 
-# 3. Upload to GitHub via gh CLI (only if not already uploaded)
+# Add the key if not already loaded
+if ! ssh-add -l 2>/dev/null | grep -q "$SSH_KEY_PATH"; then
+  echo "[+] Adding SSH key to agent: $SSH_KEY_PATH"
+  ssh-add "$SSH_KEY_PATH"
+else
+  echo "[✓] SSH key already loaded in agent"
+fi
+
+# Upload to GitHub via gh CLI (only if not already uploaded)
 if ! gh ssh-key list | grep -q "$(cut -d' ' -f2 < "$SSH_PUB_PATH")"; then
   echo "[+] Uploading SSH public key to GitHub..."
   gh ssh-key add "$SSH_PUB_PATH" --title "bootstrap@$(hostname) $(date +%Y-%m-%d)"
@@ -173,7 +183,7 @@ else
   echo "[✓] SSH public key already uploaded to GitHub"
 fi
 
-# 4. Ensure SSH config for GitHub uses this key
+# Ensure SSH config for GitHub uses this key
 SSH_CONFIG_ENTRY=$(cat <<EOF
 Host github.com
   HostName github.com
