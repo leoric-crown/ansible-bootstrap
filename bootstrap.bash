@@ -276,6 +276,9 @@ fi
 
 # Apply chezmoi config
 echo "[+] Running chezmoi config..."
+# Revert the git config change we made above
+# Ansible set our config up so it sources the chezmoi file
+git config --global --unset url."git@github.com:".insteadOf
 chezmoi apply
 
 # Helper scripts
