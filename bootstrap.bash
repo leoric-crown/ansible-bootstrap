@@ -37,7 +37,7 @@ UPDATE_CMD=""
 sync_repo() {
   local url=$1 dir=$2 branch=$3
   if [ ! -d "$dir/.git" ]; then
-    git clone --branch "$branch" "$url" "$dir"
+    git clone --depth 1 --branch "$branch" "$url" "$dir"
   else
     git -C "$dir" fetch origin "$branch"
     git -C "$dir" checkout "$branch"
@@ -204,16 +204,12 @@ else
 fi
 echo "[✓] SSH config for github.com set. Key fingerprint: $(ssh-keygen -lf "$SSH_PUB_PATH")"
 
-# 5. Set GitHub CLI to SSH and verify
-echo "[+] Ensuring GitHub CLI uses SSH..."
-gh auth login --hostname github.com --git-protocol ssh --web
-
-# Optional: verify Git is using SSH
+# Ensure Git is using SSH
 git config --global url."git@github.com:".insteadOf "https://github.com/"
 
 # Ensure GitHub CLI is authenticated
 echo "[+] Checking GitHub authentication..."
-gh auth status >/dev/null 2>&1 || gh auth login
+gh auth status >/dev/null 2>&1 || gh auth login --hostname github.com --git-protocol ssh --web
 
 echo "[+] Initializing chezmoi..."
 if [ -d "$HOME/.local/share/chezmoi" ]; then
@@ -226,7 +222,7 @@ fi
 # Ansible repo
 echo "[+] Cloning ansible repo (branch: $ANSIBLEBRANCH)…"
 if [ ! -d "$ANSIBLEDIR/.git" ]; then
-  git clone --branch "$ANSIBLEBRANCH" \
+  git clone --depth 1 --branch "$ANSIBLEBRANCH" \
     "$ANSIBLEREPO" "$ANSIBLEDIR"
 else
   echo "[✓] $ANSIBLEDIR already exists, skipping clone."
@@ -235,7 +231,7 @@ fi
 # Scripts repo
 echo "[+] Cloning leoric-scripts repo (branch: $SCRIPTBRANCH)…"
 if [ ! -d "$SCRIPTSDIR/.git" ]; then
-  git clone --branch "$SCRIPTBRANCH" \
+  git clone --depth 1 --branch "$SCRIPTBRANCH" \
     "$SCRIPTSREPO" "$SCRIPTSDIR"
 else
   echo "[✓] $SCRIPTSDIR already exists, skipping clone."
