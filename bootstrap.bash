@@ -1,6 +1,22 @@
 #!/bin/bash
 set -euo pipefail
 
+SKIP_ANSIBLE=0
+
+# Parse args
+for arg in "$@"; do
+  case "$arg" in
+    --skip-ansible|-s)
+      SKIP_ANSIBLE=1
+      shift
+      ;;
+    *)
+      echo "Unknown argument: $arg"
+      exit 1
+      ;;
+  esac
+done
+
 trap 'echo "❌ Error on line $LINENO"' ERR
 
 # Cache sudo credentials at script start
@@ -245,13 +261,17 @@ if [ -d "$SCRIPTSDIR/.git" ]; then
 fi
 
 # Ansible provisioning
-if [[ "$OS_TYPE" == "Linux" ]]; then
-  echo "[+] Running Ansible provisioning..."
-  export ANSIBLE_INVENTORY_USER="${USER:-$(whoami)}"
-  export ANSIBLE_INVENTORY_USER_DIR="$HOME"
-  ansible-playbook -i "$ANSIBLEDIR/inventory.yml" "$ANSIBLEDIR/playbook.yml" --ask-become-pass
+if [[ "$SKIP_ANSIBLE" -eq 0 ]]; then
+  if [[ "$OS_TYPE" == "Linux" ]]; then
+    echo "[+] Running Ansible provisioning..."
+    export ANSIBLE_INVENTORY_USER="${USER:-$(whoami)}"
+    export ANSIBLE_INVENTORY_USER_DIR="$HOME"
+    ansible-playbook -i "$ANSIBLEDIR/inventory.yml" "$ANSIBLEDIR/playbook.yml" --ask-become-pass
+  else
+    echo "[✓] Skipping Ansible provisioning (not Fedora/Linux, Ubuntu and macOS not tested yet)"
+  fi
 else
-  echo "[✓] Skipping Ansible provisioning (not Fedora/Linux, Ubuntu and macOS not tested yet)"
+  echo "⏭️ Skipping Ansible provisioning (skipped by user)"
 fi
 
 # Apply chezmoi config
