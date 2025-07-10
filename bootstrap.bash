@@ -18,9 +18,12 @@ trap 'kill "$SUDO_LOOP_PID"' EXIT
 ANSIBLEDIR="$HOME/ansible"
 SCRIPTSDIR="$HOME/scripts"
 
-DOTFILESREPO="https://github.com/leoric-crown/dotfiles.git"
-ANSIBLEREPO="https://github.com/leoric-crown/ansible.git"
-SCRIPTSREPO="https://github.com/leoric-crown/leoric-scripts.git"
+SSH_KEY_PATH="$HOME/.ssh/id_leoric_ed25519_github"
+SSH_PUB_PATH="${SSH_KEY_PATH}.pub"
+
+DOTFILESREPO="git@github.com:leoric-crown/dotfiles.git"
+ANSIBLEREPO="git@github.com:leoric-crown/ansible.git"
+SCRIPTSREPO="git@github.com:leoric-crown/leoric-scripts.git"
 
 ANSIBLEBRANCH="main"
 SCRIPTBRANCH="main"
@@ -146,6 +149,55 @@ install_if_missing gh
 # Ensure chezmoi is installed
 echo "[+] Ensuring chezmoi is installed/up-to-date..."
 curl -fsLS get.chezmoi.io | sh
+
+
+echo "[+] Setting up SSH key for GitHub..."
+
+# 1. Generate the SSH key if it doesn't exist
+if [ ! -f "$SSH_KEY_PATH" ]; then
+  echo "[+] Generating new SSH key at $SSH_KEY_PATH..."
+  ssh-keygen -t ed25519 -C "leoric@$(hostname)" -f "$SSH_KEY_PATH" -N ""
+else
+  echo "[✓] SSH key already exists at $SSH_KEY_PATH"
+fi
+
+# 2. Add to ssh-agent
+eval "$(ssh-agent -s)" >/dev/null
+ssh-add "$SSH_KEY_PATH"
+
+# 3. Upload to GitHub via gh CLI (only if not already uploaded)
+if ! gh ssh-key list | grep -q "$(cut -d' ' -f2 < "$SSH_PUB_PATH")"; then
+  echo "[+] Uploading SSH public key to GitHub..."
+  gh ssh-key add "$SSH_PUB_PATH" --title "bootstrap@$(hostname) $(date +%Y-%m-%d)"
+else
+  echo "[✓] SSH public key already uploaded to GitHub"
+fi
+
+# 4. Ensure SSH config for GitHub uses this key
+SSH_CONFIG_ENTRY=$(cat <<EOF
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile $SSH_KEY_PATH
+  IdentitiesOnly yes
+EOF
+)
+
+mkdir -p ~/.ssh
+if ! grep -q "$SSH_KEY_PATH" ~/.ssh/config 2>/dev/null; then
+  echo "[+] Adding SSH config for github.com..."
+  echo "$SSH_CONFIG_ENTRY" >> ~/.ssh/config
+else
+  echo "[✓] SSH config for github.com already set"
+fi
+chmod 600 ~/.ssh/config
+
+# 5. Set GitHub CLI to SSH and verify
+echo "[+] Ensuring GitHub CLI uses SSH..."
+gh auth login --hostname github.com --git-protocol ssh --web
+
+# Optional: verify Git is using SSH
+git config --global url."git@github.com:".insteadOf "https://github.com/"
 
 # Ensure GitHub CLI is authenticated
 echo "[+] Checking GitHub authentication..."
