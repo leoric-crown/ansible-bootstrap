@@ -219,6 +219,13 @@ git config --global url."git@github.com:".insteadOf "https://github.com/"
 echo "[+] Checking GitHub authentication..."
 gh auth status >/dev/null 2>&1 || gh auth login --hostname github.com --git-protocol ssh --web
 
+# Add GitHub to known_hosts
+if command -v ssh-keyscan >/dev/null 2>&1; then
+  grep -q github.com ~/.ssh/known_hosts 2>/dev/null || ssh-keyscan github.com >> ~/.ssh/known_hosts
+else
+  echo "⚠️  ssh-keyscan not available; skipping GitHub host key preloading"
+fi
+
 echo "[+] Initializing chezmoi..."
 if [ -d "$HOME/.local/share/chezmoi" ]; then
   echo "[✓] chezmoi already initialized"
