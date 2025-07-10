@@ -199,7 +199,6 @@ echo "[+] Running chezmoi config..."
 chezmoi apply
 
 # Helper scripts
-INIT_GH_CONFIG_SCRIPT="$SCRIPTSDIR/linux/init-gh-config.bash"
 GH_KEYS_SCRIPT="$SCRIPTSDIR/ssh/add-gh-ssh-keys.bash"
 PI_KEYS_SCRIPT="$SCRIPTSDIR/ssh/add-pi-ssh-keys.bash"
 PIHOLE_SCRIPT="$SCRIPTSDIR/linux/sync-pihole-hosts.bash"
@@ -211,7 +210,6 @@ echo "[+] Running optional helper scripts..."
 
 # Build helper lookup
 declare -A HELPERS=(
-  ["Initialize GitHub config"]="$INIT_GH_CONFIG_SCRIPT"
   ["Add SSH keys to GitHub"]="$GH_KEYS_SCRIPT"
   ["Add SSH keys to Pis"]="$PI_KEYS_SCRIPT"
   ["Sync PiHole hosts"]="$PIHOLE_SCRIPT"
@@ -223,7 +221,6 @@ declare -A HELPERS=(
 
 # Declare the order we want
 ORDER=(
-  "Initialize GitHub config"
   "Add SSH keys to GitHub"
   "Add SSH keys to Pis"
   "Sync PiHole hosts"
@@ -260,7 +257,7 @@ nohup xdg-open "https://www.privateinternetaccess.com/download/linux-vpn" &>/dev
 
 # Prompt user to download
 echo "[+] Please download the PIA installer to ~/Downloads and press Enter to continue, or type 'N' to skip installation:"
-read -r response
+read -rp "..." response < /dev/tty
 
 # Skip if response starts with N/n
 if [[ "$response" =~ ^[Nn] ]]; then
