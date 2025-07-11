@@ -178,7 +178,7 @@ else
 fi
 
 # Add to ssh-agent
-if [[ ! -S "$SSH_AUTH_SOCK" ]]; then
+if [[ -z "${SSH_AUTH_SOCK:-}" || ! -S "$SSH_AUTH_SOCK" ]]; then
   echo "[+] Starting new ssh-agent..."
   eval "$(ssh-agent -s)" >/dev/null
 fi
